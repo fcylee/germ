@@ -6,8 +6,9 @@ option_list <- list(make_option(c("-f", "--fasta"), action = "store", type = "ch
                     make_option(c("-k", "--k_length"), action = "store", type = "integer", help = "k-mer length [default: %default]", default = 5),
                     make_option(c("", "--lambda"), action = "store", type = "integer", help = "lambda for exponential decay scaling [default: %default]", default = 1),
                     make_option(c("", "--scaling_function"), action = "store", type = "character", help = "Custom scaling function e.g. '1/(1+(x^3))' [default: %default]", default = NULL),
-                    make_option(c("-w", "--window_size"), action = "store", type = "integer", help = "Window size [default: %default]", default = 123),
-                    make_option(c("-s", "--smoothing_size"), action = "store", type = "integer", help = "Smoothing window size [default: %default]", default = 123),
+                    make_option(c("-d", "--distance_matrix"), action = "store", type = "character", help = "Input file with distance matrix"),
+                    make_option(c("-w", "--window_size"), action = "store", type = "integer", help = "Window size for distance scaling (in the units of the distance matrix if using, or nucleotides) [default: %default]", default = 123),
+                    make_option(c("-s", "--smoothing_size"), action = "store", type = "integer", help = "Smoothing window size for score (nucleotides) [default: %default]", default = 123),
                     make_option(c("-o", "--output"), action = "store", type = "character", help = "Output filename"),
                     make_option(c("-t", "--transcripts"), action = "store", type = "character", help = "Either a comma-separated list of sequence names or a text file with one sequence name per line to plot"),
                     make_option(c("-p", "--plot_folder"), action = "store", type = "character", help = "Folder in which to output plots [default: %default]", default = "plots"),
@@ -75,6 +76,9 @@ if(!is.null(opt$lambda)) {
 if(!is.null(opt$scaling_function)) {
   logger::log_info("Scaling function          : {opt$scaling_function}")
 }
+if(!is.null(opt$distance_matrix)) {
+  logger::log_info("Input distance matrix file: {opt$distance_matrix}")
+}
 logger::log_info("Multivalency window size  : {opt$window_size}")
 logger::log_info("Smoothing window size     : {opt$smoothing_size}")
 logger::log_info("Output TSV filename       : {opt$output}")
@@ -102,6 +106,10 @@ logger::log_info("Scaled Hamming: {0:5} = {round(scaled.v, 3)}")
 
 hdm <- create_hamming_distance_matrix(opt$k_length, lambda = opt$lambda, scale_fun = f)
 pdv <- create_positional_distance_vector(opt$window_size, opt$k_length)
+if(!is.null(opt$distance_matrix)) {
+  dm <- as.matrix(read.csv(opt$distance_matrix))
+  pdm <- create_positional_distance_matrix(dm, opt$window_size, opt$k_length)
+}
 
 # Load sequences ----------------------------------------------------------
 logger::log_info("Loading sequences")
@@ -152,16 +160,26 @@ sequences <- sequences[nchar(sequences) >= opt$window_size]
 # data.table version is faster - 3.549 sec elapsed
 # tic()
 logger::log_info("Calculating k-mer multivalencies")
-all_kmer_multivalency <- mclapply(seq_along(sequences), function(i) {
-  data.table::as.data.table(calculate_kmer_multivalencies_df(sequences[i],
-                                                             names(sequences)[i],
-                                                             opt$k_length,
-                                                             opt$window_size,
-                                                             opt$smoothing_size,
-                                                             hdm,
-                                                             pdv))
-  }, mc.cores = opt$cores)
-
+if(!is.null(opt$distance_matrix)) {
+  all_kmer_multivalency <- mclapply(seq_along(sequences), function(i) {
+    data.table::as.data.table(calculate_kmer_pairwise_multivalencies(sequences[i],
+                                                                    names(sequences)[i],
+                                                                    opt$k_length,
+                                                                    opt$smoothing_size,
+                                                                    hdm,
+                                                                    pdm))
+    }, mc.cores = opt$cores)
+} else {
+  all_kmer_multivalency <- mclapply(seq_along(sequences), function(i) {
+    data.table::as.data.table(calculate_kmer_multivalencies_df(sequences[i],
+                                                              names(sequences)[i],
+                                                              opt$k_length,
+                                                              opt$window_size,
+                                                              opt$smoothing_size,
+                                                              hdm,
+                                                              pdv))
+    }, mc.cores = opt$cores)
+}
 
 
 output.dt <- data.table::rbindlist(all_kmer_multivalency)
@@ -195,12 +213,21 @@ if(!is.null(opt$transcripts)) {
   invisible(lapply(tx.v, function(x) {
 
     logger::log_info(paste("Plotting", x))
+    if(!is.null(opt$distance_matrix)) {
+      plot_kmer_multivalency_pmd(kmer_multivalency.dt = output.dt,
+                          k_len = opt$k_length,
+                          seq = sequences,
+                          seq_name = x,
+                          outdir = opt$plot_folder,
+                          annotate_max = TRUE)
+    } else {
     plot_kmer_multivalency(kmer_multivalency.dt = output.dt,
                           k_len = opt$k_length,
                           seq = sequences,
                           seq_name = x,
                           outdir = opt$plot_folder,
                           annotate_max = TRUE)
+    }
 
   }))
 

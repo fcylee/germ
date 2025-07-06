@@ -1,3 +1,13 @@
+# Position Distance Matrix Branch
+
+This branch contains code in development for custom distance matrix input
+
+if `--distance_matrix` is not supplied, GeRM runs in the exact same way as the original.
+
+distance matrix is currently only supporting one sequence per run, unlike original implementation.
+
+See below for original documentation.
+
 # GeRM - Generalised RNA multivalency
 
 **[Mutual homeostasis of charged proteins](https://doi.org/10.1101/2023.08.21.554177)**
@@ -54,7 +64,7 @@ conda activate germs
 GeRM requires R to be installed on your system and uses some R (`optparse`, `devtools`, `data.table`, `tidyverse`, `scales`, `ggthemes`, `cowplot`, `patchwork`, `logger`) and Bioconductor packages (`Biostrings`). If you have R already installed, you can install the GeRM R package by moving to the directory into which you cloned GeRM and then run:
 
 ```
-R -e 'devtools:install()'
+R -e 'devtools::install()'
 ```
 
 ### 3. Docker option

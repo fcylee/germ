@@ -81,6 +81,22 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// calculate_kmer_pairwise_multivalencies
+DataFrame calculate_kmer_pairwise_multivalencies(std::string input_seq, std::string input_seq_name, int k_len, int smoothing_size, NumericMatrix hamming_distances, NumericMatrix positional_distances);
+RcppExport SEXP _germs_calculate_kmer_pairwise_multivalencies(SEXP input_seqSEXP, SEXP input_seq_nameSEXP, SEXP k_lenSEXP, SEXP smoothing_sizeSEXP, SEXP hamming_distancesSEXP, SEXP positional_distancesSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< std::string >::type input_seq(input_seqSEXP);
+    Rcpp::traits::input_parameter< std::string >::type input_seq_name(input_seq_nameSEXP);
+    Rcpp::traits::input_parameter< int >::type k_len(k_lenSEXP);
+    Rcpp::traits::input_parameter< int >::type smoothing_size(smoothing_sizeSEXP);
+    Rcpp::traits::input_parameter< NumericMatrix >::type hamming_distances(hamming_distancesSEXP);
+    Rcpp::traits::input_parameter< NumericMatrix >::type positional_distances(positional_distancesSEXP);
+    rcpp_result_gen = Rcpp::wrap(calculate_kmer_pairwise_multivalencies(input_seq, input_seq_name, k_len, smoothing_size, hamming_distances, positional_distances));
+    return rcpp_result_gen;
+END_RCPP
+}
 // calculate_sliding_mean
 NumericVector calculate_sliding_mean(NumericVector iv, int ws);
 RcppExport SEXP _germs_calculate_sliding_mean(SEXP ivSEXP, SEXP wsSEXP) {
@@ -112,6 +128,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_germs_list_kmer_multivalencies", (DL_FUNC) &_germs_list_kmer_multivalencies, 5},
     {"_germs_calculate_padded_sliding_mean", (DL_FUNC) &_germs_calculate_padded_sliding_mean, 2},
     {"_germs_calculate_kmer_multivalencies_df", (DL_FUNC) &_germs_calculate_kmer_multivalencies_df, 7},
+    {"_germs_calculate_kmer_pairwise_multivalencies", (DL_FUNC) &_germs_calculate_kmer_pairwise_multivalencies, 6},
     {"_germs_calculate_sliding_mean", (DL_FUNC) &_germs_calculate_sliding_mean, 2},
     {"_germs_list_sliding_means", (DL_FUNC) &_germs_list_sliding_means, 2},
     {NULL, NULL, 0}

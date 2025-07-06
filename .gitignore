@@ -9,3 +9,11 @@ src/*.dll
 .DS_Store
 output.tsv.gz
 plots
+plots_pmd
+plots_nonstdchars
+output_nonstdchars.tsv.gz
+test_5_123_123.multivalency.tsv.gz
+test_pdm_5_123_123.multivalency.tsv.gz
+test_pdm_5_123_33.multivalency.tsv.gz
+test_data/test_matrix.csv
+test_data/test_pdm.fasta

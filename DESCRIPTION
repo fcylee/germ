@@ -11,4 +11,4 @@ LazyData: true
 Imports: 
     Rcpp, ggplot2
 LinkingTo: Rcpp
-RoxygenNote: 7.2.1
+RoxygenNote: 7.2.3

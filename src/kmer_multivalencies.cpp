@@ -299,5 +299,114 @@ DataFrame calculate_kmer_multivalencies_df(std::string input_seq, std::string in
   return(df);
 }
 
+//' Calculates k-mer multivalencies with tidy output for complete 2d matrix and a positional distance matrix
+//'
+//' @param input_seq sequence string
+//' @param input_seq_name sequence string name (e.g. transcript id)
+//' @param k_len an integer specifying the length of the k-mer
+//' @param smoothing size integer specifying smoothingwindow_size
+//' @param hamming_distances the Hamming distance matrix
+//' @param positional_distances the positional distance matrix
+//'
+//' @return a data frame of k-mer multivalencies summed per position
+//' @export
+// [[Rcpp::export]]
+DataFrame calculate_kmer_pairwise_multivalencies(std::string input_seq, std::string input_seq_name, int k_len, int smoothing_size, NumericMatrix hamming_distances, NumericMatrix positional_distances)
+{
+  // Calculate centering offset
+  int center_offset = (k_len - 1) / 2;
+  int seq_length = input_seq.length();
+  
+  // Extract k-mers (standard extraction for mapping)
+  int num_kmers = seq_length - (k_len - 1);
+  CharacterVector input_kmers(num_kmers);
 
+  for (int i = 0; i < num_kmers; ++i) {
+    input_kmers[i] = input_seq.substr(i, k_len);
+  }
 
+  // Map k-mers to indices
+  CharacterVector hd_kmers = rownames(hamming_distances);
+  NumericVector match_kmers(input_kmers.size());
+  match_kmers = match(input_kmers, hd_kmers);
+
+  // Handle unexpected characters
+  int hd_dim = pow(4, k_len) + 1;
+  for (int i = 0; i < num_kmers; ++i) {
+    if (match_kmers[i] < 0) {
+      match_kmers[i] = hd_dim;
+    }
+  }
+
+  // Create full sequence length pairwise matrix
+  NumericMatrix output_matrix(seq_length, seq_length);
+
+  for(int i = 0; i < seq_length; ++i) {
+    for(int j = 0; j < seq_length; ++j) {
+      
+      // Determine k-mer indices for positions i and j
+      int kmer_index_i, kmer_index_j;
+      
+      // Check if position i can have a centered k-mer
+      if (i >= center_offset && i < seq_length - center_offset) {
+        int kmer_pos_i = i - center_offset;  // Which k-mer is centered at position i
+        kmer_index_i = match_kmers[kmer_pos_i] - 1;
+      } else {
+        kmer_index_i = hd_dim - 1;  // N k-mer (should be zeros)
+      }
+      
+      // Same for position j
+      if (j >= center_offset && j < seq_length - center_offset) {
+        int kmer_pos_j = j - center_offset;
+        kmer_index_j = match_kmers[kmer_pos_j] - 1;
+      } else {
+        kmer_index_j = hd_dim - 1;  // N k-mer (should be zeros)
+      }
+      
+      // Calculate similarity
+      double ham_value = hamming_distances(kmer_index_i, kmer_index_j);
+      double pos_weight = positional_distances(i, j);
+      
+      output_matrix(i, j) = ham_value * pos_weight;
+    }
+  }
+
+  // Calculate summed scores per position
+  NumericVector position_scores(seq_length);
+  for(int i = 0; i < seq_length; ++i) {
+    double sum_score = 0;
+    for(int j = 0; j < seq_length; ++j) {
+      sum_score += output_matrix(i, j);
+    }
+    position_scores[i] = sum_score;
+  }
+
+  // Calculate sliding mean of scores (same as original)
+  NumericVector smoothed_scores(seq_length);
+  smoothed_scores = calculate_padded_sliding_mean(position_scores, smoothing_size);
+
+  // Create k-mer column for each position (like original)
+  CharacterVector seqnames_pos(seq_length);
+  CharacterVector position_kmers(seq_length);
+  std::string n_kmer(k_len, 'N');  // N k-mer for edge positions
+  
+  for(int i = 0; i < seq_length; ++i) {
+    seqnames_pos[i] = input_seq_name;
+    
+    // Get k-mer centered at position i
+    if (i >= center_offset && i < seq_length - center_offset) {
+      int kmer_pos = i - center_offset;
+      position_kmers[i] = input_kmers[kmer_pos];
+    } else {
+      position_kmers[i] = n_kmer;  // N k-mer for edges
+    }
+  }
+
+  // Return position summary with k-mers (like original code)
+  DataFrame df = DataFrame::create(Named("sequence_name") = seqnames_pos,
+                                   Named("kmer") = position_kmers,
+                                   Named("position_multivalency") = position_scores,
+                                   Named("smoothed_position_multivalency") = smoothed_scores);
+
+  return(df);
+}

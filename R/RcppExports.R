@@ -67,6 +67,21 @@ calculate_kmer_multivalencies_df <- function(input_seq, input_seq_name, k_len, w
     .Call(`_germs_calculate_kmer_multivalencies_df`, input_seq, input_seq_name, k_len, window_size, smoothing_size, hamming_distances, positional_distances)
 }
 
+#' Calculates k-mer multivalencies with tidy output for complete 2d matrix and a positional distance matrix
+#'
+#' @param input_seq sequence string
+#' @param input_seq_name sequence string name (e.g. transcript id)
+#' @param k_len an integer specifying the length of the k-mer
+#' @param smoothing size integer specifying smoothingwindow_size
+#' @param hamming_distances the Hamming distance matrix
+#' @param positional_distances the positional distance matrix
+#'
+#' @return a data frame of k-mer multivalencies summed per position
+#' @export
+calculate_kmer_pairwise_multivalencies <- function(input_seq, input_seq_name, k_len, smoothing_size, hamming_distances, positional_distances) {
+    .Call(`_germs_calculate_kmer_pairwise_multivalencies`, input_seq, input_seq_name, k_len, smoothing_size, hamming_distances, positional_distances)
+}
+
 #' Calculates sliding mean
 #'
 #' @param iv numeric vector
