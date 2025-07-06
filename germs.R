@@ -214,7 +214,7 @@ if(!is.null(opt$transcripts)) {
 
     logger::log_info(paste("Plotting", x))
     if(!is.null(opt$distance_matrix)) {
-      plot_kmer_multivalency_pmd(kmer_multivalency.dt = output.dt,
+      plot_kmer_multivalency_pdm(kmer_multivalency.dt = output.dt,
                           k_len = opt$k_length,
                           seq = sequences,
                           seq_name = x,

@@ -10,7 +10,7 @@
 #' @return PDF of smoothed k-mer multivalency plot
 #' @export
 #' @import ggplot2
-plot_kmer_multivalency_pmd <- function(kmer_multivalency.dt, k_len, seq, seq_name, outdir, interactive = FALSE, annotate_max = FALSE) {
+plot_kmer_multivalency_pdm <- function(kmer_multivalency.dt, k_len, seq, seq_name, outdir, interactive = FALSE, annotate_max = FALSE) {
   tx.dt <- kmer_multivalency.dt[kmer_multivalency.dt$sequence_name == seq_name, ]
   
   # CHANGED: Removed offset since new approach returns one row per sequence position, not per k-mer
