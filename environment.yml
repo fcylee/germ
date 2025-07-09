@@ -19,4 +19,5 @@ dependencies:
   - conda-forge::r-cowplot=1.1.1
   - conda-forge::r-patchwork=1.1.1
   - conda-forge::r-logger=0.2.2
+  - conda-forge::r-viridis=0.6.2
   - bioconda::bioconductor-biostrings=2.62.0

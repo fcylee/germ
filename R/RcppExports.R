@@ -76,7 +76,7 @@ calculate_kmer_multivalencies_df <- function(input_seq, input_seq_name, k_len, w
 #' @param hamming_distances the Hamming distance matrix
 #' @param positional_distances the positional distance matrix
 #'
-#' @return a data frame of k-mer multivalencies summed per position
+#' @return a list with matrix of pairwise k-mer weighted similarities and data frame of k-mer multivalencies summed per position
 #' @export
 calculate_kmer_pairwise_multivalencies <- function(input_seq, input_seq_name, k_len, smoothing_size, hamming_distances, positional_distances) {
     .Call(`_germs_calculate_kmer_pairwise_multivalencies`, input_seq, input_seq_name, k_len, smoothing_size, hamming_distances, positional_distances)

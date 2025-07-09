@@ -27,7 +27,7 @@ calculate_kmer_pairwise_multivalencies(
 \item{smoothing}{size integer specifying smoothingwindow_size}
 }
 \value{
-a data frame of k-mer multivalencies summed per position
+a list with matrix of pairwise k-mer weighted similarities and data frame of k-mer multivalencies summed per position
 }
 \description{
 Calculates k-mer multivalencies with tidy output for complete 2d matrix and a positional distance matrix

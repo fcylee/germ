@@ -82,7 +82,7 @@ BEGIN_RCPP
 END_RCPP
 }
 // calculate_kmer_pairwise_multivalencies
-DataFrame calculate_kmer_pairwise_multivalencies(std::string input_seq, std::string input_seq_name, int k_len, int smoothing_size, NumericMatrix hamming_distances, NumericMatrix positional_distances);
+List calculate_kmer_pairwise_multivalencies(std::string input_seq, std::string input_seq_name, int k_len, int smoothing_size, NumericMatrix hamming_distances, NumericMatrix positional_distances);
 RcppExport SEXP _germs_calculate_kmer_pairwise_multivalencies(SEXP input_seqSEXP, SEXP input_seq_nameSEXP, SEXP k_lenSEXP, SEXP smoothing_sizeSEXP, SEXP hamming_distancesSEXP, SEXP positional_distancesSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;

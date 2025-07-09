@@ -308,10 +308,10 @@ DataFrame calculate_kmer_multivalencies_df(std::string input_seq, std::string in
 //' @param hamming_distances the Hamming distance matrix
 //' @param positional_distances the positional distance matrix
 //'
-//' @return a data frame of k-mer multivalencies summed per position
+//' @return a list with matrix of pairwise k-mer weighted similarities and data frame of k-mer multivalencies summed per position
 //' @export
 // [[Rcpp::export]]
-DataFrame calculate_kmer_pairwise_multivalencies(std::string input_seq, std::string input_seq_name, int k_len, int smoothing_size, NumericMatrix hamming_distances, NumericMatrix positional_distances)
+List calculate_kmer_pairwise_multivalencies(std::string input_seq, std::string input_seq_name, int k_len, int smoothing_size, NumericMatrix hamming_distances, NumericMatrix positional_distances)
 {
   // Calculate centering offset
   int center_offset = (k_len - 1) / 2;
@@ -408,5 +408,7 @@ DataFrame calculate_kmer_pairwise_multivalencies(std::string input_seq, std::str
                                    Named("position_multivalency") = position_scores,
                                    Named("smoothed_position_multivalency") = smoothed_scores);
 
-  return(df);
+  List result = List::create(Named("matrix") = output_matrix,
+                            Named("position_summary") = df);
+return(result);
 }

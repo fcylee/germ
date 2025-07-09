@@ -161,14 +161,24 @@ sequences <- sequences[nchar(sequences) >= opt$window_size]
 # tic()
 logger::log_info("Calculating k-mer multivalencies")
 if(!is.null(opt$distance_matrix)) {
-  all_kmer_multivalency <- mclapply(seq_along(sequences), function(i) {
-    data.table::as.data.table(calculate_kmer_pairwise_multivalencies(sequences[i],
-                                                                    names(sequences)[i],
-                                                                    opt$k_length,
-                                                                    opt$smoothing_size,
-                                                                    hdm,
-                                                                    pdm))
-    }, mc.cores = opt$cores)
+  # Store full results (including matrices)
+  all_kmer_all <- mclapply(seq_along(sequences), function(i) {
+    calculate_kmer_pairwise_multivalencies(sequences[i],
+                                          names(sequences)[i],
+                                          opt$k_length,
+                                          opt$smoothing_size,
+                                          hdm,
+                                          pdm)
+  }, mc.cores = opt$cores)
+  
+  # Extract just position summaries for combining
+  all_kmer_multivalency <- lapply(all_kmer_all, function(x) {
+    data.table::as.data.table(x$position_summary)
+  })
+  
+  # Name the full results for easy access later
+  names(all_kmer_all) <- names(sequences)
+  
 } else {
   all_kmer_multivalency <- mclapply(seq_along(sequences), function(i) {
     data.table::as.data.table(calculate_kmer_multivalencies_df(sequences[i],
@@ -178,9 +188,8 @@ if(!is.null(opt$distance_matrix)) {
                                                               opt$smoothing_size,
                                                               hdm,
                                                               pdv))
-    }, mc.cores = opt$cores)
+  }, mc.cores = opt$cores)
 }
-
 
 output.dt <- data.table::rbindlist(all_kmer_multivalency)
 # toc()
@@ -220,6 +229,10 @@ if(!is.null(opt$transcripts)) {
                           seq_name = x,
                           outdir = opt$plot_folder,
                           annotate_max = TRUE)
+      plot_kmer_multivalency_pdm_heatmap(kmer_multivalency_all = all_kmer_all[[x]],
+                          seq_name = x,
+                          k_len = opt$k_length,
+                          outdir = opt$plot_folder)                    
     } else {
     plot_kmer_multivalency(kmer_multivalency.dt = output.dt,
                           k_len = opt$k_length,
