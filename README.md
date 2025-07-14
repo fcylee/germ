@@ -2,7 +2,7 @@
 
 This branch contains code in development for custom distance matrix input
 
-if `--distance_matrix` is not supplied, GeRM runs in the exact same way as the original.
+if `--distance_matrix` is not supplied, GeRM runs in the exact same way as the original (but with some fixes).
 
 distance matrix is currently only supporting one sequence per run, unlike original implementation.
 

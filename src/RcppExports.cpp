@@ -10,6 +10,20 @@ Rcpp::Rostream<true>&  Rcpp::Rcout = Rcpp::Rcpp_cout_get();
 Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
 #endif
 
+// create_hamming_distance_matrix_cpp
+NumericMatrix create_hamming_distance_matrix_cpp(int k_len, Nullable<double> lambda, bool unweighted, Nullable<Function> scale_fun);
+RcppExport SEXP _germs_create_hamming_distance_matrix_cpp(SEXP k_lenSEXP, SEXP lambdaSEXP, SEXP unweightedSEXP, SEXP scale_funSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< int >::type k_len(k_lenSEXP);
+    Rcpp::traits::input_parameter< Nullable<double> >::type lambda(lambdaSEXP);
+    Rcpp::traits::input_parameter< bool >::type unweighted(unweightedSEXP);
+    Rcpp::traits::input_parameter< Nullable<Function> >::type scale_fun(scale_funSEXP);
+    rcpp_result_gen = Rcpp::wrap(create_hamming_distance_matrix_cpp(k_len, lambda, unweighted, scale_fun));
+    return rcpp_result_gen;
+END_RCPP
+}
 // kmer_chopper
 CharacterVector kmer_chopper(std::string input_seq, int k_len);
 RcppExport SEXP _germs_kmer_chopper(SEXP input_seqSEXP, SEXP k_lenSEXP) {
@@ -123,6 +137,7 @@ END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
+    {"_germs_create_hamming_distance_matrix_cpp", (DL_FUNC) &_germs_create_hamming_distance_matrix_cpp, 4},
     {"_germs_kmer_chopper", (DL_FUNC) &_germs_kmer_chopper, 2},
     {"_germs_calculate_kmer_multivalencies", (DL_FUNC) &_germs_calculate_kmer_multivalencies, 5},
     {"_germs_list_kmer_multivalencies", (DL_FUNC) &_germs_list_kmer_multivalencies, 5},

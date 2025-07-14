@@ -10,7 +10,8 @@ plot_kmer_multivalency_pdm_heatmap(
   k_len,
   outdir,
   interactive = FALSE,
-  max_size = 2000
+  max_size = 2000,
+  percentile_clip = c(0.1, 0.99)
 )
 }
 \arguments{

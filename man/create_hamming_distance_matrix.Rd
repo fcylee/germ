@@ -7,6 +7,7 @@
 create_hamming_distance_matrix(
   k_len,
   lambda = 1,
+  unweighted = FALSE,
   scale_fun = function(x) {
      1/(1 + (x^3))
  }

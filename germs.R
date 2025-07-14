@@ -4,7 +4,7 @@ suppressPackageStartupMessages(library(optparse))
 
 option_list <- list(make_option(c("-f", "--fasta"), action = "store", type = "character", help = "Input FASTA file with sequences"),
                     make_option(c("-k", "--k_length"), action = "store", type = "integer", help = "k-mer length [default: %default]", default = 5),
-                    make_option(c("", "--lambda"), action = "store", type = "integer", help = "lambda for exponential decay scaling [default: %default]", default = 1),
+                    make_option(c("", "--lambda"), action = "store", type = "integer", help = "lambda for exponential decay scaling, use 0 when using a custom scaling function [default: %default]", default = 1),
                     make_option(c("", "--scaling_function"), action = "store", type = "character", help = "Custom scaling function e.g. '1/(1+(x^3))' [default: %default]", default = NULL),
                     make_option(c("-d", "--distance_matrix"), action = "store", type = "character", help = "Input file with distance matrix"),
                     make_option(c("-w", "--window_size"), action = "store", type = "integer", help = "Window size for distance scaling (in the units of the distance matrix if using, or nucleotides) [default: %default]", default = 123),
@@ -17,6 +17,11 @@ option_list <- list(make_option(c("-f", "--fasta"), action = "store", type = "ch
 
 opt_parser = OptionParser(option_list = option_list)
 opt <- parse_args(opt_parser)
+
+# Convert sentinel value to NULL
+if(opt$lambda == 0) {
+  opt$lambda <- NULL
+}
 
 suppressPackageStartupMessages(library(germs))
 suppressPackageStartupMessages(library(Biostrings))
@@ -94,17 +99,23 @@ logger::log_info("Building scoring matrices")
 if(!is.null(opt$lambda)) {
   f <- function(x) exp(-opt$lambda * x)
 } else if(!is.null(opt$scaling_function)) {
-  eval(parse(text = paste0("f <- function(x) ", opt$scaling_function)))
+  eval(parse(text = paste0("f <- function(x) {", opt$scaling_function, "}")))
 } else {
   f <- NULL
 }
 
 # Hamming scores
 v <- vapply(0:opt$k_length, f, numeric(1))
-scaled.v <- (v - min(v))/(max(v) - min(v))
-logger::log_info("Scaled Hamming: {0:5} = {round(scaled.v, 3)}")
+if(min(v) == max(v)) {
+  scaled.v <- rep(1, length(v))
+  unweighted <- TRUE
+} else {
+  scaled.v <- (v - min(v)) / (max(v) - min(v))
+  unweighted <- FALSE
+}
+logger::log_info(glue::glue("Scaled Hamming (0:{opt$k_length}): {paste(round(scaled.v, 3), collapse = ', ')}"))
 
-hdm <- create_hamming_distance_matrix(opt$k_length, lambda = opt$lambda, scale_fun = f)
+hdm <- create_hamming_distance_matrix_cpp(opt$k_length, lambda = opt$lambda, unweighted = unweighted, scale_fun = f)
 pdv <- create_positional_distance_vector(opt$window_size, opt$k_length)
 if(!is.null(opt$distance_matrix)) {
   dm <- as.matrix(read.csv(opt$distance_matrix))

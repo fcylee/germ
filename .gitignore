@@ -8,16 +8,7 @@ src/*.dll
 
 .DS_Store
 output.tsv.gz
-plots
-plots_pdm
-plots_pdm2
-plots_nonstdchars
+plots*
 output_nonstdchars.tsv.gz
-test_5_123_123.multivalency.tsv.gz
-test_pdm_5_123_123.multivalency.tsv.gz
-test_pdm_5_123_33.multivalency.tsv.gz
-test_pdm2
-test_pdm*
-test_data/test_matrix.csv
-test_data/test_matrix2.csv
-test_data/test_pdm.fasta
+test_*.gz
+test_data

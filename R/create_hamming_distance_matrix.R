@@ -7,7 +7,7 @@
 #' @return scaled Hamming distance matrix
 #' @export
 #'
-create_hamming_distance_matrix <- function(k_len, lambda = 1, scale_fun = function(x) { 1/(1+(x^3)) }) {
+create_hamming_distance_matrix <- function(k_len, lambda = 1, unweighted = FALSE, scale_fun = function(x) { 1/(1+(x^3)) }) {
 
   # Generate all k-mers.
   nts <- c("A", "C", "G", "T")
@@ -27,34 +27,42 @@ create_hamming_distance_matrix <- function(k_len, lambda = 1, scale_fun = functi
 
   # colnames(hamming_matrix) <- kmer_strings
   # rownames(hamming_matrix) <- kmer_strings
-
-  hamming_matrix <- mapply(calculate_hamming_distance,
-                           rep(kmer_list, times = length(kmer_list)),
-                           rep(kmer_list, each = length(kmer_list)))
-  hamming_matrix <- matrix(hamming_matrix,
-                           nrow = length(kmer_list),
-                           ncol = length(kmer_list),
-                           dimnames = list(kmer_strings, kmer_strings))
-
-  # This scoring becomes more meaningless as k becomes small?
-  # Tweak me if using larger values?
-  # scaled_hamming_matrix <- 1/(1 + (hamming_matrix ^ 3))
-  if(!is.null(lambda)) {
-    .scale_fun <- function(x) exp(-lambda * x)
-    scaled_hamming_matrix <- .scale_fun(hamming_matrix)
-  } else if(is.null(scale_fun)) {
-    scaled_hamming_matrix <- hamming_matrix
+  if(unweighted) {
+    scaled_hamming_matrix <- matrix(1,
+                             nrow = length(kmer_list),
+                             ncol = length(kmer_list),
+                             dimnames = list(kmer_strings, kmer_strings))
   } else {
-    scaled_hamming_matrix <- scale_fun(hamming_matrix)
+    hamming_matrix <- mapply(calculate_hamming_distance,
+                            rep(kmer_list, times = length(kmer_list)),
+                            rep(kmer_list, each = length(kmer_list)))
+    hamming_matrix <- matrix(hamming_matrix,
+                            nrow = length(kmer_list),
+                            ncol = length(kmer_list),
+                            dimnames = list(kmer_strings, kmer_strings))
+    # This scoring becomes more meaningless as k becomes small?
+    # Tweak me if using larger values?
+    # scaled_hamming_matrix <- 1/(1 + (hamming_matrix ^ 3))
+    if(!is.null(lambda)) {
+      .scale_fun <- function(x) exp(-lambda * x)
+      scaled_hamming_matrix <- .scale_fun(hamming_matrix)
+    } else if(is.null(scale_fun)) {
+      scaled_hamming_matrix <- hamming_matrix
+    } else {
+      scaled_hamming_matrix <- scale_fun(hamming_matrix)
+    }
   }
 
   #Adjust the weights so that min = 0, max = 1.
-  scaled_hamming_matrix <- scaled_hamming_matrix - min(scaled_hamming_matrix)
-  # scaled_hamming_matrix <- scaled_hamming_matrix * (1 / max(scaled_hamming_matrix))
-  scaled_hamming_matrix <- scaled_hamming_matrix/max(scaled_hamming_matrix)
+  if(min(scaled_hamming_matrix) == max(scaled_hamming_matrix)) { # here on the safe side, but this should already be taken care of by unweighted == TRUE
+    scaled_hamming_matrix[] <- 1
+  } else {
+    scaled_hamming_matrix <- scaled_hamming_matrix - min(scaled_hamming_matrix)
+    # scaled_hamming_matrix <- scaled_hamming_matrix * (1 / max(scaled_hamming_matrix))
+    scaled_hamming_matrix <- scaled_hamming_matrix/max(scaled_hamming_matrix)
 
-  scaled_hamming_matrix[dim(scaled_hamming_matrix)[1], dim(scaled_hamming_matrix)[1]] <- 0 # make N k-mer = 0 against itself.
-
+    scaled_hamming_matrix[dim(scaled_hamming_matrix)[1], dim(scaled_hamming_matrix)[1]] <- 0 # make N k-mer = 0 against itself.
+  }
   return(scaled_hamming_matrix)
 
 }
