@@ -72,11 +72,23 @@ plot_kmer_multivalency_pdm_heatmap <- function(kmer_multivalency_all, seq_name, 
   }
   
   # Convert to long format for ggplot
-  heatmap_data <- data.frame(
-    position_i = rep(1:seq_length, seq_length),
-    position_j = rep(1:seq_length, each = seq_length),
-    multivalency = as.vector(combined_matrix)
-  )
+  # Scale positions to represent original sequence coordinates
+  if(binning_done) {
+    # Map binned positions back to original sequence positions (use bin centers)
+    original_positions <- ((1:seq_length - 1) * bin_size) + (bin_size / 2)
+    heatmap_data <- data.frame(
+      position_i = rep(original_positions, seq_length),
+      position_j = rep(original_positions, each = seq_length),
+      multivalency = as.vector(combined_matrix)
+    )
+  } else {
+    # No binning - use original positions
+    heatmap_data <- data.frame(
+      position_i = rep(1:seq_length, seq_length),
+      position_j = rep(1:seq_length, each = seq_length),
+      multivalency = as.vector(combined_matrix)
+    )
+  }
   
   # Create subtitle with binning information
   if(binning_done) {
@@ -92,8 +104,8 @@ plot_kmer_multivalency_pdm_heatmap <- function(kmer_multivalency_all, seq_name, 
     scale_fill_viridis_c(limits = c(0, 1)) +
     labs(title = paste0("Distance-Weighted ", k_len, "-mer Similarity: \n", seq_name),
          subtitle = subtitle_text,
-         x = "Sequence/Binned Position",
-         y = "Sequence/Binned Position",
+         x = "Sequence Position",
+         y = "Sequence Position",
          fill = "Similarity\nScore") +
     theme_minimal() +
     theme(
@@ -129,8 +141,8 @@ plot_kmer_multivalency_pdm_heatmap <- function(kmer_multivalency_all, seq_name, 
     scale_fill_viridis_c(limits = c(clipped_min, clipped_max)) +  # Use percentile limits
     labs(title = paste0("Distance-Weighted ", k_len, "-mer Similarity: \n", seq_name, " (Clipped)"),
          subtitle = paste0(subtitle_text, "\nColor scale: ", min(percentile_clip)*100, "th-", max(percentile_clip)*100, "th percentile"),
-         x = "Sequence/Binned Position",
-         y = "Sequence/Binned Position",
+         x = "Sequence Position",
+         y = "Sequence Position",
          fill = "Similarity\nScore") +
     theme_minimal() +
     theme(panel.grid = element_blank(),

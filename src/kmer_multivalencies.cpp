@@ -348,7 +348,7 @@ List calculate_kmer_pairwise_multivalencies(std::string input_seq, std::string i
       int kmer_index_i, kmer_index_j;
       
       // Check if position i can have a centered k-mer
-      if (i >= center_offset && i < seq_length - center_offset) {
+      if (i >= center_offset && i < center_offset + num_kmers) {
         int kmer_pos_i = i - center_offset;  // Which k-mer is centered at position i
         kmer_index_i = match_kmers[kmer_pos_i] - 1;
       } else {
@@ -356,7 +356,7 @@ List calculate_kmer_pairwise_multivalencies(std::string input_seq, std::string i
       }
       
       // Same for position j
-      if (j >= center_offset && j < seq_length - center_offset) {
+      if (j >= center_offset && j < center_offset + num_kmers) {
         int kmer_pos_j = j - center_offset;
         kmer_index_j = match_kmers[kmer_pos_j] - 1;
       } else {
@@ -394,7 +394,7 @@ List calculate_kmer_pairwise_multivalencies(std::string input_seq, std::string i
     seqnames_pos[i] = input_seq_name;
     
     // Get k-mer centered at position i
-    if (i >= center_offset && i < seq_length - center_offset) {
+    if (i >= center_offset && i < center_offset + num_kmers) {
       int kmer_pos = i - center_offset;
       position_kmers[i] = input_kmers[kmer_pos];
     } else {

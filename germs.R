@@ -4,7 +4,7 @@ suppressPackageStartupMessages(library(optparse))
 
 option_list <- list(make_option(c("-f", "--fasta"), action = "store", type = "character", help = "Input FASTA file with sequences"),
                     make_option(c("-k", "--k_length"), action = "store", type = "integer", help = "k-mer length [default: %default]", default = 5),
-                    make_option(c("", "--lambda"), action = "store", type = "integer", help = "lambda for exponential decay scaling, use 0 when using a custom scaling function [default: %default]", default = 1),
+                    make_option(c("", "--lambda"), action = "store", type = "double", help = "lambda for exponential decay scaling, use 0 when using a custom scaling function [default: %default]", default = 1),
                     make_option(c("", "--scaling_function"), action = "store", type = "character", help = "Custom scaling function e.g. '1/(1+(x^3))' [default: %default]", default = NULL),
                     make_option(c("-d", "--distance_matrix"), action = "store", type = "character", help = "Input file with distance matrix"),
                     make_option(c("-w", "--window_size"), action = "store", type = "integer", help = "Window size for distance scaling (in the units of the distance matrix if using, or nucleotides) [default: %default]", default = 123),

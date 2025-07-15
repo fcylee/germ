@@ -15,8 +15,8 @@
 plot_kmer_multivalency <- function(kmer_multivalency.dt, k_len, seq, seq_name, outdir, interactive = FALSE, annotate_max = FALSE) {
 
   tx.dt <- kmer_multivalency.dt[kmer_multivalency.dt$sequence_name == seq_name, ]
-  tx.dt$coord <- 1:nrow(tx.dt) + floor(k_len/2)
-  stopifnot((max(tx.dt$coord) + floor(k_len/2)) == nchar(seq[names(seq) == seq_name])) # Sanity check that the padding matches the sequence length
+  tx.dt$coord <- 1:nrow(tx.dt) + floor((k_len-1)/2) # left-bias for even kmers
+  stopifnot((max(tx.dt$coord) + ceiling((k_len-1)/2)) == nchar(seq[names(seq) == seq_name])) # (corrected for even kmers) Sanity check that the padding matches the sequence length
 
   p <- ggplot() +
     geom_line(data = tx.dt, aes(x = coord, y = smoothed_kmer_multivalency)) +
